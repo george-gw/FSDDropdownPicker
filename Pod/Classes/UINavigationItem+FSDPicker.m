@@ -8,11 +8,16 @@
 
 #import "UINavigationItem+FSDPicker.h"
 
-
 @implementation UINavigationItem (FSDPicker)
 
 - (FSDDropdownPicker *)addDropdownPickerWithOptions:(NSArray *)options {
     FSDDropdownPicker *picker = [[FSDDropdownPicker alloc] initWithOptions:options];
+    self.rightBarButtonItem = picker;
+    return picker;
+}
+
+- (FSDDropdownPicker *)addDropdownPickerWithOptions:(NSArray *)options andMainItem:(id<FSDPickerItemProtocol>)mainItem {
+    FSDDropdownPicker *picker = [[FSDDropdownPicker alloc] initWithOptions:options andMainItem:mainItem];
     self.rightBarButtonItem = picker;
     return picker;
 }

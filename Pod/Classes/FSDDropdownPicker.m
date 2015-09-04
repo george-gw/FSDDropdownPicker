@@ -11,13 +11,14 @@
 
 @interface FSDDropdownPicker () <UITableViewDelegate, UITableViewDataSource>
 
+@property (strong, nonatomic) id<FSDPickerItemProtocol> mainItem;
+
 @property (assign, nonatomic) CGRect originalFrame;
 @property (assign, nonatomic) CGRect tableFrame;
 @property (strong, nonatomic) NSArray *options;
 @property (strong, nonatomic) UITableView *tableView;
 @property (strong, nonatomic) UIVisualEffectView *bluredEffectView;
 @property (strong, nonatomic) UIView *tapOutView;
-@property (strong, nonatomic) UIButton *actionButton;
 
 @end
 
@@ -25,34 +26,46 @@
 
 
 - (instancetype)initWithOptions:(NSArray *)options {
-    //    UIImage *buttonImage = [UIImage imageNamed:@"icon_calendar"];
-    //    self.actionButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    //    [self.actionButton setImage:buttonImage forState:UIControlStateNormal];
-    //    self.actionButton.frame = CGRectMake(0.0, 0.0, buttonImage.size.width, buttonImage.size.height);
-    //    if(self = [super initWithCustomView:self.actionButton]){
-    //        [self.actionButton addTarget:self action:@selector(didTapButton:) forControlEvents:UIControlEventTouchUpInside;
-    id <FSDPickerItemProtocol> firstItem = [options firstObject];
-    UIImage *buttonImage = [firstItem image];
-    UIButton *actionButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    [actionButton setImage:buttonImage forState:UIControlStateNormal];
-    actionButton.frame = CGRectMake(0.0, 0.0, 44, 44); //buttonImage.size.width, buttonImage.size.height);
-    
-    
-    if (self = [super initWithCustomView:actionButton]) {
-        [actionButton addTarget:self action:@selector(buttonTapped:) forControlEvents:UIControlEventTouchUpInside];
-        
-        self.actionButton = actionButton;
-        
+    if (self = [super initWithImage:[[options firstObject] image] style:UIBarButtonItemStylePlain target:self action:@selector(buttonTapped:)]) {
+
         self.options = options;
         _isDropped = NO;
         self.selectedOption = [options firstObject];
         
         self.displaysImageInList = NO;
-        
+
+        self.showSelectedOption = YES;
+
         self.tapOutView = nil;
         
         self.rowHeight = 44.0f;
+
+        self.backgroundColor = [UIColor colorWithWhite:1.000 alpha:0.850];
         
+        self.listSeparator = UITableViewCellSeparatorStyleNone;
+    }
+    return self;
+}
+
+- (instancetype)initWithOptions:(NSArray *)options andMainItem:(id<FSDPickerItemProtocol>)mainItem {
+    self.mainItem = mainItem;
+
+    if (self = [super initWithImage:mainItem.image style:UIBarButtonItemStylePlain target:self action:@selector(buttonTapped:)]) {
+        self.options = options;
+        _isDropped = NO;
+
+        self.showSelectedOption = NO;
+
+        self.selectedOption = [options firstObject];
+
+        self.displaysImageInList = NO;
+
+        self.tapOutView = nil;
+
+        self.rowHeight = 44.0f;
+
+        self.backgroundColor = [UIColor colorWithWhite:1.000 alpha:0.850];
+
         self.listSeparator = UITableViewCellSeparatorStyleNone;
     }
     return self;
@@ -63,13 +76,9 @@
     self.tableView.dataSource = nil;
 }
 
-- (UINavigationBar *)navigationBar {
-    return (UINavigationBar *)[self.customView superview];
-}
-
 - (UITableView *)tableView {
     if (!_tableView) {
-        CGRect navFrame = [self navigationBar].frame;
+        CGRect navFrame = self.navigationBar.frame;
         self.tableFrame = CGRectMake(CGRectGetMinX(navFrame), CGRectGetMaxY(navFrame), CGRectGetWidth(navFrame), self.options.count * self.rowHeight);
         
         _tableView = [[UITableView alloc] initWithFrame:self.tableFrame];
@@ -79,10 +88,11 @@
         _tableView.scrollEnabled = NO;
         _tableView.separatorStyle = self.listSeparator;
         _tableView.rowHeight = self.rowHeight;
-        _tableView.backgroundColor = [UIColor colorWithWhite:1.000 alpha:0.850];
-        
-        [self hideDropdownAnimated:NO];
-        
+        _tableView.backgroundColor = self.backgroundColor;
+
+        if(!_isDropped)
+            [self hideDropdownAnimated:NO];
+
         UIBezierPath *shadowPath = [UIBezierPath bezierPathWithRect:self.tableView.bounds];
         self.tableView.layer.masksToBounds = NO;
         self.tableView.layer.shadowColor = [UIColor blackColor].CGColor;
@@ -92,7 +102,7 @@
         self.tableView.layer.shadowPath = shadowPath.CGPath;
     }
     if (!_tableView.superview) {
-        [[self navigationBar].superview insertSubview:_tableView belowSubview:[self navigationBar]];
+        [self.navigationBar.superview insertSubview:_tableView belowSubview:self.navigationBar];
     }
     return _tableView;
 }
@@ -120,8 +130,7 @@
 }
 
 - (void)toggleDropdown {
-    _isDropped = !_isDropped;
-    if (self.isDropped) {
+    if (!_isDropped) {
         [self showDropdownAnimated:YES];
     }
     else {
@@ -130,7 +139,6 @@
 }
 
 - (void)showDropdownAnimated:(BOOL)animated {
-    _isDropped = YES;
     [self.delegate dropdownPicker:self didDropDown:YES];
     
     self.tableView.hidden = NO;
@@ -146,6 +154,7 @@
                          }
          
                          completion: ^(BOOL finished) {
+                             _isDropped = YES;
                          }];
     }
     else {
@@ -156,7 +165,6 @@
 }
 
 - (void)hideDropdownAnimated:(BOOL)animated {
-    _isDropped = NO;
     [self.delegate dropdownPicker:self didDropDown:NO];
     
     CGRect frame = self.tableFrame;
@@ -174,6 +182,7 @@
          
                          completion: ^(BOOL finished) {
                              self.tableView.hidden = YES;
+                             _isDropped = NO;
                          }];
     }
     else {
@@ -197,8 +206,8 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:identifier];
     if (!cell) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identifier];
-        cell.textLabel.font = [UIFont systemFontOfSize:self.rowHeight / 2.3];
-        cell.textLabel.textColor = [UIColor blackColor];
+        cell.textLabel.font = self.rowFont ? self.rowFont : [UIFont systemFontOfSize:self.rowHeight / 2.3];
+        cell.textLabel.textColor = self.rowTextColor ? self.rowTextColor : [UIColor blackColor];
         cell.backgroundColor = [UIColor clearColor];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -227,7 +236,8 @@
 
 - (void)setSelectedOption:(id <FSDPickerItemProtocol> )selectedOption {
     _selectedOption = selectedOption;
-    [self.actionButton setImage:[_selectedOption image] forState:UIControlStateNormal];
+    if(self.showSelectedOption)
+        [self setImage:[_selectedOption image]];
     
     if (self.delegate && [self.delegate dropdownPicker:self didSelectOption:_selectedOption]) {
         [self hideDropdownAnimated:YES];

@@ -10,7 +10,6 @@
 #import <UIKit/UIKit.h>
 #import "FSDPickerItemProtocol.h"
 
-
 @protocol FSDDropdownPickerDelegate;
 
 @interface FSDDropdownPicker : UIBarButtonItem
@@ -19,6 +18,11 @@
  *  The delegate
  */
 @property (weak, nonatomic) id <FSDDropdownPickerDelegate> delegate;
+
+/**
+ *  The navigation bar on which the item will be placed
+ */
+@property (strong, nonatomic) UINavigationBar * navigationBar;
 
 /**
  *  If the picker is currently dropped down or not
@@ -36,10 +40,28 @@
 @property (assign, nonatomic) CGFloat rowHeight;
 
 /**
+ *  The font of each option in the dropdown picker
+ */
+@property (assign, nonatomic) UIFont * rowFont;
+
+/**
+ *  The text color of each option in the dropdown picker
+ */
+@property (copy, nonatomic) UIColor * rowTextColor UI_APPEARANCE_SELECTOR;
+
+/**
+ *  The dropdown picker's backgroundColor
+ */
+@property (copy, nonatomic) UIColor * backgroundColor UI_APPEARANCE_SELECTOR;
+/**
  *  Whether to show images when the picker drops down or not
  */
 @property (assign, nonatomic) BOOL displaysImageInList;
 
+/**
+ *  Whether to show the selected option when an option is picked from the drop down
+ */
+@property (assign, nonatomic) BOOL showSelectedOption;
 
 /**
  *  The list separator style for the picker items
@@ -59,6 +81,16 @@
  *  @return FSDDropdownPicker instance
  */
 - (instancetype)initWithOptions:(NSArray *)options;
+
+/**
+ *  Initialize a FSDDropdownpicker instance given a list of items to display
+ *
+ *  @param options array containing id<FSDPickerItemProtocol> items to be displayed
+ *  @param mainItem the item that will be added to the navigation bar
+ *
+ *  @return FSDDropdownPicker instance
+ */
+- (instancetype)initWithOptions:(NSArray *)options andMainItem:(id<FSDPickerItemProtocol>)mainItem;
 
 /**
  *  Shows the dropdown list

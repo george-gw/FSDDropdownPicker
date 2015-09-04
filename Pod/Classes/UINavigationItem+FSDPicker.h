@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "FSDDropdownPicker.h"
+#import "FSDPickerItemProtocol.h"
 
 @interface UINavigationItem (FSDPicker)
 
@@ -19,5 +20,15 @@
  *  @return FSDDropdown picker instance
  */
 - (FSDDropdownPicker *)addDropdownPickerWithOptions:(NSArray *)options;
+
+/**
+ *  Adds a dropdown picker to the navigation item
+ *
+ *  @param options  the array of options to be displayed
+ *  @param mainItem the item that will be added to the navigation bar
+ *
+ *  @return FSDDropdown picker instance
+ */
+- (FSDDropdownPicker *)addDropdownPickerWithOptions:(NSArray *)options andMainItem:(id<FSDPickerItemProtocol>)mainItem;
 
 @end

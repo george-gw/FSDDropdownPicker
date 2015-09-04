@@ -15,6 +15,7 @@
 
 @property (strong, nonatomic) NSString *name;
 @property (strong, nonatomic) UIImage *image;
+@property (assign, nonatomic) NSInteger tag;
 
 - (instancetype)initWithName:(NSString *)name andImage:(UIImage *)image;
 
