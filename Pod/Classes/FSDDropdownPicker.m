@@ -72,8 +72,10 @@
 }
 
 - (void)dealloc {
-    self.tableView.delegate = nil;
-    self.tableView.dataSource = nil;
+    if(_tableView) {
+        _tableView.delegate = nil;
+        _tableView.dataSource = nil;
+    }
 }
 
 - (UITableView *)tableView {
