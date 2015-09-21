@@ -26,7 +26,7 @@
 
 
 - (instancetype)initWithOptions:(NSArray *)options {
-    if (self = [super initWithImage:[[options firstObject] image] style:UIBarButtonItemStylePlain target:self action:@selector(buttonTapped:)]) {
+    if (self = [super initWithImage:(UIImage *)[[options firstObject] image] style:UIBarButtonItemStylePlain target:self action:@selector(buttonTapped:)]) {
 
         self.options = options;
         _isDropped = NO;
